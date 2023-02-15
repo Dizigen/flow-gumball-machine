@@ -3,20 +3,9 @@ import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link'
+import Spacer from '@/components/shared/spacer'
 
 const inter = Inter({ subsets: ['latin'] })
-
-type SpacerProps = {
-  orientation: 'vertical' | 'horizontal';
-  size: number;
-}
-
-const Spacer: React.FunctionComponent<SpacerProps> = (props) => {
-  const { orientation, size } = props;
-  if (orientation === 'vertical') return <div style={{width: '5px', height: `${size}px`}}/>
-  else if (orientation === 'horizontal') return <div style={{width: `${size}px`, height: '5px'}}/>
-  else return <></>
-}
 
 export default function Home() {
   return (
