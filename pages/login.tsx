@@ -58,7 +58,7 @@ export default function Login() {
       <Spacer orientation="vertical" size={12} />
       <button onClick={doLogin}>Login</button>
       <Spacer orientation="vertical" size={12} />
-      {isLoggedIn && <div className={inter.className}>Public Address: { publicAddress }</div>}
+      {isLoggedIn && <div className={inter.className}>Flow Public Address: { publicAddress }</div>}
       </main>
     </>
   )
