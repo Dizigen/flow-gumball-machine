@@ -1,11 +1,17 @@
-import { IS_CLIENT } from "@/config/env";
 import { Magic } from "magic-sdk";
-import Web3 from "web3";
+import { FlowExtension } from '@magic-ext/flow';
 
 const MagicPublicApiKey = 'pk_live_C25C66046040A78A';
 
 export function getMagicInstance () {
-    const client = new Magic(MagicPublicApiKey);
+    const client = new Magic(MagicPublicApiKey, {
+        extensions: [
+          new FlowExtension({
+            rpcUrl: 'https://access-testnet.onflow.org',
+            network: 'testnet' // testnet or mainnet to connect different network
+          }),
+        ],
+      });
     (window as any).magicClient = client;
     return client;
 }
