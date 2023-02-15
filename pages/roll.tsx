@@ -5,6 +5,7 @@ import Spacer from '@/components/shared/spacer'
 import { useState } from 'react'
 import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
+import Image from 'next/image';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -46,19 +47,32 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-      <h2 className={inter.className}>
-        Enter Email to Login
-      </h2>
-      <Spacer orientation="vertical" size={12} />
-      <input 
-        className={`${styles.loginInput} ${inter.className}`} 
-        type="text" 
-        value={userEmail} 
-        onChange={(e) => setUserEmail(e.target.value)} />
-      <Spacer orientation="vertical" size={12} />
-      <button onClick={doLogin}>Login</button>
-      <Spacer orientation="vertical" size={12} />
-      {isLoggedIn && <div className={inter.className}>Flow Public Address: { publicAddress }</div>}
+        {!isLoggedIn &&
+          <>
+            <h2 className={inter.className}>
+              Enter Email to Login
+            </h2>
+            <Spacer orientation="vertical" size={12} />
+            <input 
+              className={`${styles.loginInput} ${inter.className}`} 
+              type="text" 
+              value={userEmail} 
+              onChange={(e) => setUserEmail(e.target.value)} />
+            <Spacer orientation="vertical" size={12} />
+            <button style={{height: '36px', cursor: 'pointer'}} onClick={doLogin}>Login</button>
+            <Spacer orientation="vertical" size={12} />
+          </>
+        }
+      {isLoggedIn && 
+        <div className={inter.className}>
+          <div>Flow Public Address: { publicAddress }</div>
+          <Spacer orientation="vertical" size={24} />
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <Image src="/gumball-machine.png" alt="" width={480} height={480}/>
+            <Spacer orientation="vertical" size={24} />
+            <button style={{height: '36px', cursor: 'pointer'}}>Roll for $3</button>
+          </div>
+        </div>}
       </main>
     </>
   )

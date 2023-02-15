@@ -21,7 +21,7 @@ export default function Home() {
         Hello
       </h2>
       <Spacer orientation="vertical" size={12}/>
-      <Link className={inter.className} href="/login"><b>Go To Login</b></Link>
+      <Link className={inter.className} href="/roll"><b>Roll for Gumballs</b></Link>
       </main>
     </>
   )
