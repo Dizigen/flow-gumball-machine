@@ -7,7 +7,7 @@ export function getMagicInstance () {
     const client = new Magic(MagicPublicApiKey, {
         extensions: [
           new FlowExtension({
-            rpcUrl: 'https://access-testnet.onflow.org',
+            rpcUrl: 'https://rest-testnet.onflow.org',
             network: 'testnet' // testnet or mainnet to connect different network
           }),
         ],
