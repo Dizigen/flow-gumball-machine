@@ -22,9 +22,9 @@ export default function Login() {
         execute: async () => {
             const loggedIn = await getMagicInstance().user.isLoggedIn();
             setIsLoggedIn(loggedIn);
-            if (isLoggedIn) {
+            if (loggedIn) {
                 const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
-                setPublicAddress(pubAddr || '')
+                setPublicAddress(pubAddr || '');
             }
         }
      }
