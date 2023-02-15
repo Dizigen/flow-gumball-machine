@@ -2,9 +2,8 @@ import Head from 'next/head'
 import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
 import Spacer from '@/components/shared/spacer'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAsyncEffect } from 'usable-react'
-import Web3 from 'web3'
 import { getMagicInstance } from '@/libs/magic-sdk'
 
 const inter = Inter({ subsets: ['latin'] });
@@ -24,9 +23,8 @@ export default function Login() {
             const loggedIn = await getMagicInstance().user.isLoggedIn();
             setIsLoggedIn(loggedIn);
             if (isLoggedIn) {
-                const web3 = new Web3(getMagicInstance().rpcProvider as any);
-                const pubAddr = (await web3.eth.getAccounts())[0];
-                setPublicAddress(pubAddr)
+                const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
+                setPublicAddress(pubAddr || '')
             }
         }
      }
@@ -35,9 +33,8 @@ export default function Login() {
   const doLogin = async () => {
     await getMagicInstance().auth.loginWithEmailOTP({ email: userEmail });
     setIsLoggedIn(true);
-    const web3 = new Web3(getMagicInstance().rpcProvider as any);
-    const pubAddr = (await web3.eth.getAccounts())[0];
-    setPublicAddress(pubAddr)
+    const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
+    setPublicAddress(pubAddr || '')
   }
 
   return (
