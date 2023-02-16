@@ -9,10 +9,31 @@ import Image from 'next/image';
 
 const inter = Inter({ subsets: ['latin'] });
 
+type PaymentModalProps ={
+  showModal: Boolean;
+  onCloseModal: () => void
+}
+
+const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
+  const { showModal, onCloseModal } = props;
+
+  return (showModal ? 
+    <div className={`${styles.modalWrapper} ${inter.className}`}>
+      <div className={styles.modal}>
+        <div>Giiiiveee meeee youurrrr monnneeeyyyyyy!!!!</div>
+        <Spacer orientation="vertical" size={36}/>
+        <button onClick={onCloseModal} style={{width: '200px', height: '32px'}}>Close</button>
+      </div>
+    </div>
+    : <></>
+  )
+}
+
 export default function Login() {
   const [userEmail, setUserEmail] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [publicAddress, setPublicAddress] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useAsyncEffect(() => {
     const context = {
@@ -70,10 +91,13 @@ export default function Login() {
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Image src="/gumball-machine.png" alt="" width={480} height={480}/>
             <Spacer orientation="vertical" size={24} />
-            <button style={{height: '36px', cursor: 'pointer'}}>Roll for $3</button>
+            <button 
+              style={{height: '36px', cursor: 'pointer'}}
+              onClick={() => setShowPaymentModal(true)}>Roll for $3</button>
           </div>
         </div>}
       </main>
+      <PaymentModal showModal={showPaymentModal} onCloseModal={() => setShowPaymentModal(false)}/>
     </>
   )
 }
