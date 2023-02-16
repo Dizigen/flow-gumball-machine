@@ -6,8 +6,12 @@ import { useState } from 'react'
 import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
 import Image from 'next/image';
+const fcl = require("@onflow/fcl");
 
 const inter = Inter({ subsets: ['latin'] });
+const FLOW_TOKEN_OFFSET = 10000000;
+
+fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
 
 type PaymentModalProps ={
   showModal: Boolean;
@@ -15,6 +19,7 @@ type PaymentModalProps ={
 }
 
 const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
+  fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
   const { showModal, onCloseModal } = props;
 
   return (showModal ? 
@@ -22,6 +27,8 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
       <div className={styles.modal}>
         <div>Giiiiveee meeee youurrrr monnneeeyyyyyy!!!!</div>
         <Spacer orientation="vertical" size={36}/>
+        <button onClick={() => {}} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
+        <Spacer orientation="vertical" size={12} />
         <button onClick={onCloseModal} style={{width: '200px', height: '32px'}}>Close</button>
       </div>
     </div>
@@ -33,13 +40,13 @@ export default function Login() {
   const [userEmail, setUserEmail] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [publicAddress, setPublicAddress] = useState('');
+  const [accountBalance, setAccountBalance] = useState(undefined);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useAsyncEffect(() => {
     const context = {
         hello: 'world'
     }
-    console.log('context: ', context);
     return { 
         execute: async () => {
             const loggedIn = await getMagicInstance().user.isLoggedIn();
@@ -47,6 +54,8 @@ export default function Login() {
             if (loggedIn) {
                 const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
                 setPublicAddress(pubAddr || '');
+                const acc = await fcl.account(pubAddr);
+                setAccountBalance(acc.balance);
             }
         }
      }
@@ -56,7 +65,9 @@ export default function Login() {
     await getMagicInstance().auth.loginWithEmailOTP({ email: userEmail });
     setIsLoggedIn(true);
     const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
-    setPublicAddress(pubAddr || '')
+    setPublicAddress(pubAddr || '');
+    const acc = await fcl.account(pubAddr);
+    setAccountBalance(acc.balance);
   }
 
   return (
@@ -87,6 +98,7 @@ export default function Login() {
       {isLoggedIn && 
         <div className={inter.className}>
           <div>Flow Public Address: { publicAddress }</div>
+          <div>Flow Tokens (not that it matters): { ((accountBalance || 0) / FLOW_TOKEN_OFFSET) } </div>
           <Spacer orientation="vertical" size={24} />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Image src="/gumball-machine.png" alt="" width={480} height={480}/>
@@ -97,7 +109,9 @@ export default function Login() {
           </div>
         </div>}
       </main>
-      <PaymentModal showModal={showPaymentModal} onCloseModal={() => setShowPaymentModal(false)}/>
+      {
+        showPaymentModal && <PaymentModal showModal={showPaymentModal} onCloseModal={() => setShowPaymentModal(false)}/>
+      }
     </>
   )
 }
