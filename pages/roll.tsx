@@ -19,6 +19,10 @@ type PaymentModalProps ={
   onCloseModal: () => void
 }
 
+const Loader:React.FunctionComponent = (props) => {
+  return <div className={styles.loader}/>
+}
+
 const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
   const { showModal, onCloseModal } = props;
@@ -39,6 +43,7 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
 
 export default function Login() {
   const [userEmail, setUserEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [publicAddress, setPublicAddress] = useState('');
   const [accountBalance, setAccountBalance] = useState(undefined);
@@ -58,6 +63,7 @@ export default function Login() {
                 const acc = await fcl.account(pubAddr);
                 setAccountBalance(acc.balance);
             }
+            setIsLoading(false);
         }
      }
   }, [])
@@ -71,6 +77,13 @@ export default function Login() {
     setAccountBalance(acc.balance);
   }
 
+  const doLogout = async () => {
+    setIsLoading(true);
+    await getMagicInstance().user.logout();
+    setIsLoggedIn(false)
+    setIsLoading(false);
+  }
+
   return (
     <>
       <Head>
@@ -80,6 +93,7 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        {isLoading && <Loader />}
         {!isLoggedIn &&
           <>
             <h2 className={inter.className}>
@@ -111,6 +125,10 @@ export default function Login() {
             <button 
               style={{height: '36px', cursor: 'pointer'}}
               onClick={() => setShowPaymentModal(true)}>Roll for $3</button>
+            <Spacer orientation="vertical" size={12} />
+            <button 
+              style={{height: '36px', cursor: 'pointer'}}
+              onClick={doLogout}>Logout</button>
           </div>
         </div>}
       </main>
