@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
 import Image from 'next/image';
+import Link from 'next/link'
 const fcl = require("@onflow/fcl");
 
 const inter = Inter({ subsets: ['latin'] });
@@ -97,8 +98,12 @@ export default function Login() {
         }
       {isLoggedIn && 
         <div className={inter.className}>
-          <div>Flow Public Address: { publicAddress }</div>
-          <div>Flow Tokens (not that it matters): { ((accountBalance || 0) / FLOW_TOKEN_OFFSET) } </div>
+          <div>Public Address: { publicAddress }</div>
+          <div>Tokens (not that it matters): { ((accountBalance || 0) / FLOW_TOKEN_OFFSET) } </div>
+          <Link
+            href="https://testnet-faucet.onflow.org/fund-account"
+            style={{textDecoration: 'underline'}}
+            target="_blank">Testnet Faucet</Link>
           <Spacer orientation="vertical" size={24} />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Image src="/gumball-machine.png" alt="" width={480} height={480}/>
