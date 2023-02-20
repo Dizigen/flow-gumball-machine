@@ -8,12 +8,17 @@ import { getMagicInstance } from '@/libs/magic-sdk'
 import Image from 'next/image';
 import Link from 'next/link'
 const fcl = require("@onflow/fcl");
+import { TatumFlowSDK } from '@tatumio/flow';
+import { Currency, FlowMintedResult, TransactionHash } from '@tatumio/api-client'
+import { NFT_CONTRACT_ADDRESS } from './api/roll';
 
 const inter = Inter({ subsets: ['latin'] });
 const FLOW_TOKEN_OFFSET = 10000000;
 
 fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
 fcl.config().put('challenge.handshake', 'http://access-001.devnet9.nodes.onflow.org:8000');
+
+const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
 
 type RollModalProps ={
   showModal: Boolean;
@@ -74,6 +79,7 @@ export default function Login() {
   const [publicAddress, setPublicAddress] = useState('');
   const [accountBalance, setAccountBalance] = useState(undefined);
   const [showRollModal, setShowRollModal] = useState(false);
+  const [nftBalance, setNftBalance] = useState(false);
 
   // Results. Refreshes after every roll
   const [ nftTokenId, setNftTokenId ] = useState('');
@@ -94,11 +100,15 @@ export default function Login() {
                 setPublicAddress(pubAddr || '');
                 const acc = await fcl.account(pubAddr);
                 setAccountBalance(acc.balance);
+                // const nftAccountBalance = await callToGetBalanceApi(publicAddress);
+                const nftAccountBalance = await flowSDK.nft.getNFTAccountBalance(Currency.FLOW, publicAddress, NFT_CONTRACT_ADDRESS);
+                console.log('nftAccountBalance: ', nftAccountBalance);
+                // setNftBalance(nftAccountBalance);
             }
             setIsLoading(false);
         }
      }
-  }, [])
+  }, [publicAddress])
 
   const doLogin = async () => {
     await getMagicInstance().auth.loginWithEmailOTP({ email: userEmail });
@@ -125,6 +135,7 @@ export default function Login() {
     setShowRollModal(true);
     setStatus('Executing Authorization Function');
     const AUTHORIZATION_FUNCTION = getMagicInstance().flow.authorization;
+
     var response = await fcl.send([
       fcl.transaction`import TatumMultiNFT from 0x87fe4ebd0cddde06
       transaction {  
@@ -180,6 +191,7 @@ export default function Login() {
       {isLoggedIn && 
         <div className={inter.className}>
           <div>Public Address: { publicAddress }</div>
+          <div>NFT Balance: { nftBalance }</div>
           <div>Tokens (not that it matters): { ((accountBalance || 0) / FLOW_TOKEN_OFFSET) } </div>
           <Link
             href="https://testnet-faucet.onflow.org/fund-account"

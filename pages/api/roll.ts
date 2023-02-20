@@ -5,7 +5,7 @@ import { Currency, FlowMintedResult, TransactionHash } from '@tatumio/api-client
 import { TatumFlowSDK } from '@tatumio/flow';
 
 const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
-const NFT_CONTRACT_ADDRESS = '96b5bdba-29b8-4df2-ad8a-b139e144e321';
+export const NFT_CONTRACT_ADDRESS = '96b5bdba-29b8-4df2-ad8a-b139e144e321';
 const DEPLOYER_ACCOUNT = '0x8b0875529a6da050';
 const DEPLOYER_PK = 'b79acb3fd72eb9eaf71f5e6823c2feda38353e75f2782f27287e70aa42cce4d1';
 
