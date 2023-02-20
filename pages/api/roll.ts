@@ -18,20 +18,10 @@ const roll = async (dest_addr: string) => {
         chain: Currency.FLOW,
         contractAddress: NFT_CONTRACT_ADDRESS,
         account: DEPLOYER_ACCOUNT,
-        to: DEPLOYER_ACCOUNT,
+        to: dest_addr,
         privateKey: DEPLOYER_PK,
         url: getRandomAssetName() // unused for now. this is metadata
       })) as FlowMintedResult
-      console.log('nftMinted.txId:', nftMinted.txId);
-      const tokenId = nftMinted.tokenId?.toString() as string
-      const nftTransferred = (await flowSDK.nft.send.transferSignedTransaction({
-        chain: Currency.FLOW,
-        to: dest_addr,
-        tokenId,
-        account: DEPLOYER_ACCOUNT,
-        privateKey: DEPLOYER_PK,
-        contractAddress: NFT_CONTRACT_ADDRESS,
-      })) as TransactionHash
     return nftMinted.tokenId;
 }
 type Data = {
