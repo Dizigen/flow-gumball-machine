@@ -66,12 +66,11 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   return (showModal ? 
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
-        <div style={{width: '100%', height: '100%'}}>
-          <div>IPFS Url</div>
-          <input 
+        <div className={styles.modalContent}>
+          <div>IPFS Url: <input 
             value={assetUrl}
             onChange={(e) => setAssetUrl(e.target.value)}
-            style={{height: '36px', width: '200px'}}/>
+            style={{height: '36px', width: '200px'}}/> </div>
           <Spacer orientation="vertical" size={12} />
           <button onClick={doDeployContract} style={{width: '200px', height: '32px'}}>Deploy Contract</button>
           <Spacer orientation="vertical" size={12} />
