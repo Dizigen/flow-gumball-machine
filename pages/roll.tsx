@@ -79,7 +79,7 @@ export default function Login() {
   const [publicAddress, setPublicAddress] = useState('');
   const [accountBalance, setAccountBalance] = useState(undefined);
   const [showRollModal, setShowRollModal] = useState(false);
-  const [nftBalance, setNftBalance] = useState(false);
+  const [nftBalance, setNftBalance] = useState([] as any);
 
   // Results. Refreshes after every roll
   const [ nftTokenId, setNftTokenId ] = useState('');
@@ -101,9 +101,13 @@ export default function Login() {
                 const acc = await fcl.account(pubAddr);
                 setAccountBalance(acc.balance);
                 // const nftAccountBalance = await callToGetBalanceApi(publicAddress);
-                const nftAccountBalance = await flowSDK.nft.getNFTAccountBalance(Currency.FLOW, publicAddress, NFT_CONTRACT_ADDRESS);
-                console.log('nftAccountBalance: ', nftAccountBalance);
-                // setNftBalance(nftAccountBalance);
+                const assets = new Array();
+                const nftAccountBalance = (await flowSDK.nft.getNFTAccountBalance(Currency.FLOW, publicAddress, NFT_CONTRACT_ADDRESS)) as Array<string>;
+                for (let i = 0; i < nftAccountBalance.length; i++) {
+                  const assetName = await flowSDK.nft.getNFTMetadataURI(Currency.FLOW, NFT_CONTRACT_ADDRESS, nftAccountBalance[i], publicAddress);
+                  assets.unshift((assetName as any).data);
+                }
+                setNftBalance(assets);
             }
             setIsLoading(false);
         }
@@ -191,8 +195,7 @@ export default function Login() {
       {isLoggedIn && 
         <div className={inter.className}>
           <div>Public Address: { publicAddress }</div>
-          <div>NFT Balance: { nftBalance }</div>
-          <div>Tokens (not that it matters): { ((accountBalance || 0) / FLOW_TOKEN_OFFSET) } </div>
+          <div style={{ width: '400px'}}>Collection: [ {nftBalance.map((tokenName:string) => <>{tokenName}, </>)} ]</div>
           <Link
             href="https://testnet-faucet.onflow.org/fund-account"
             style={{textDecoration: 'underline'}}
