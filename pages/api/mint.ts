@@ -1,13 +1,13 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-// import { Currency, FlowMintedResult } from '@tatumio/api-client'
+import { Currency, FlowMintedResult } from '@tatumio/api-client'
 
-// import { TatumFlowSDK } from '@tatumio/flow';
+import { TatumFlowSDK } from '@tatumio/flow';
 
-// const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
+const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
 
 const mint = async (contractAddress: string, account: string, privateKey: string, url: string) => {
-    /* const nftMinted = (await flowSDK.nft.send.mintSignedTransaction({
+    const nftMinted = (await flowSDK.nft.send.mintSignedTransaction({
         chain: Currency.FLOW,
         contractAddress,
         account,
@@ -17,8 +17,7 @@ const mint = async (contractAddress: string, account: string, privateKey: string
         url // 'ipfs://bafybeidi7xixphrxar6humruz4mn6ul7nzmres7j4triakpfabiezll4ti/metadata.json',
       })) as FlowMintedResult
       console.log('nftMinted.txId:', nftMinted.txId);
-    return nftMinted.tokenId;*/
-    return 'abc';
+    return nftMinted.tokenId;
 }
 type Data = {
     nft_token_id: string | undefined
