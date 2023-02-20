@@ -7,18 +7,21 @@ import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
 import Image from 'next/image';
 import Link from 'next/link'
+import { TatumFlowSDK } from '@tatumio/flow';
 const fcl = require("@onflow/fcl");
 
 const inter = Inter({ subsets: ['latin'] });
 const FLOW_TOKEN_OFFSET = 10000000;
 
 fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
+fcl.config().put('challenge.handshake', 'http://access-001.devnet9.nodes.onflow.org:8000');
 
 type RollModalProps ={
   showModal: Boolean;
   onCloseModal: () => void;
   destAddress: string;
   nftTokenId: string;
+  status: string;
 }
 
 const Loader:React.FunctionComponent = (props) => {
@@ -36,14 +39,14 @@ const callRollApi = async (dest_addr: string) => {
 }
 
 const RollModal:React.FunctionComponent<RollModalProps> = (props) => {
-  fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
-  const { showModal, onCloseModal, destAddress, nftTokenId } = props;
+  const { showModal, onCloseModal, destAddress, nftTokenId, status } = props;
 
   return (showModal ? 
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
         <div className={styles.modalContent}>
           <Spacer orientation="vertical" size={12} />
+          <div>Status: {status}</div>
           <Spacer orientation="vertical" size={12} />
           <div>Minted NFT TokenId: {nftTokenId}</div>
           <Spacer orientation="vertical" size={24} />
@@ -63,6 +66,7 @@ export default function Login() {
   const [accountBalance, setAccountBalance] = useState(undefined);
   const [showRollModal, setShowRollModal] = useState(false);
   const [ nftTokenId, setNftTokenId ] = useState('');
+  const [ status, setStatus ] = useState('');
 
   useAsyncEffect(() => {
     const context = {
@@ -99,8 +103,34 @@ export default function Login() {
     setIsLoading(false);
   }
 
+  const getReferenceBlock = async () => {
+    const response = await fcl.send([fcl.getBlock(false)]);
+    const data = await fcl.decode(response);
+    return data.id;
+  };
   const doRoll = async () => {
     setShowRollModal(true);
+    setStatus('Executing Authorization Function');
+    const AUTHORIZATION_FUNCTION = getMagicInstance().flow.authorization;
+    var response = await fcl.send([
+      fcl.transaction`import TatumMultiNFT from 0x87fe4ebd0cddde06
+      transaction {  
+        prepare(signer: AuthAccount) {
+          if signer.borrow<&TatumMultiNFT.Collection>(from: TatumMultiNFT.CollectionStoragePath) == nil {
+            let collection <- TatumMultiNFT.createEmptyCollection()
+            signer.save(<-collection, to: TatumMultiNFT.CollectionStoragePath)
+            signer.link<&TatumMultiNFT.Collection>(TatumMultiNFT.CollectionPublicPath, target: TatumMultiNFT.CollectionStoragePath)
+          }
+        }
+      }`,
+      fcl.ref(await getReferenceBlock()),
+      fcl.proposer(AUTHORIZATION_FUNCTION),
+      fcl.authorizations([AUTHORIZATION_FUNCTION]),
+      fcl.payer(AUTHORIZATION_FUNCTION),
+    ]);
+    setStatus('Waiting for function to be sealed')
+    await fcl.tx(response).onceSealed();
+    setStatus('Rolling for an NFT')
     const nft_tokenId = await callRollApi(publicAddress);
     setNftTokenId(nft_tokenId);
   }
@@ -159,7 +189,8 @@ export default function Login() {
             showModal={showRollModal}
             onCloseModal={() => setShowRollModal(false)}
             destAddress={publicAddress}
-            nftTokenId={nftTokenId}/>
+            nftTokenId={nftTokenId}
+            status={status}/>
       }
     </>
   )
