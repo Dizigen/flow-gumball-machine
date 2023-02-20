@@ -1,9 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 // import { Currency, TransactionHash } from '@tatumio/tatum';
-// import { TatumFlowSDK } from '@tatumio/flow';
+import { TatumFlowSDK } from '@tatumio/flow';
 
-// const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
+const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
 
 // Test deployment wallets
 let private_key: string, account: string;
