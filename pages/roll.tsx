@@ -49,7 +49,7 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   const [ deployedContractAddress, setDeployedContractAddress ] = useState('');
   const [ deployerAccount, setDeployerAccount ] = useState('');
   const [ deployerPK, setDeployerPK ] = useState('');
-  const [ assetUrl, setAssetUrl ] = useState('ipfs://bafybeidi7xixphrxar6humruz4mn6ul7nzmres7j4triakpfabiezll4ti/metadata.json');
+  const [ assetUrl, setAssetUrl ] = useState('gemini/metadata.json');
 
   const doDeployContract = async () => {
     const resDeployContract = await callDeployContractApi();
@@ -67,17 +67,17 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
         <div className={styles.modalContent}>
-          <div>IPFS Url: <input 
-            value={assetUrl}
-            onChange={(e) => setAssetUrl(e.target.value)}
-            style={{height: '36px', width: '200px'}}/> </div>
-          <Spacer orientation="vertical" size={12} />
           <button onClick={doDeployContract} style={{width: '200px', height: '32px'}}>Deploy Contract</button>
           <Spacer orientation="vertical" size={12} />
           <div>NFT Contract Address: {deployedContractAddress}</div>
           <div>Deployer Account: {deployerAccount}</div>
           <div>Deployer PK: {deployerPK}</div>
           <Spacer orientation="vertical" size={36}/>
+          <div>Token Uri: <input 
+            value={assetUrl}
+            onChange={(e) => setAssetUrl(e.target.value)}
+            style={{height: '36px', width: '200px'}}/> </div>
+          <Spacer orientation="vertical" size={12} />
           <button onClick={doMintNFT} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
           <Spacer orientation="vertical" size={12} />
           <div>Minted NFT TokenId: {nftTokenId}</div>
