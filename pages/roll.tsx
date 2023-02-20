@@ -23,17 +23,57 @@ const Loader:React.FunctionComponent = (props) => {
   return <div className={styles.loader}/>
 }
 
+const callDeployContractApi = async () => {
+  const res = await (await fetch(`/api/hello`));
+  const data = await res.json();
+  return data;
+}
+
+const callMintContractApi = async (tokenContractAddress: string, account: string, pk: string) => {
+  const res = await (await fetch(`/api/mint`, {
+    headers: {
+      contract_address: tokenContractAddress,
+      account,
+      pk
+    }
+  }));
+  const data = await res.json();
+  return data.nft_token_id;
+}
+
 const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
   const { showModal, onCloseModal } = props;
+  const [ nftTokenId, setNftTokenId ] = useState('');
+  const [ deployedContractAddress, setDeployedContractAddress ] = useState('');
+  const [ deployerAccount, setDeployerAccount ] = useState('');
+  const [ deployerPK, setDeployerPK ] = useState('');
+
+  const doDeployContract = async () => {
+    const resDeployContract = await callDeployContractApi();
+    setDeployedContractAddress(resDeployContract.contract_address);
+    setDeployerAccount(resDeployContract.account);
+    setDeployerPK(resDeployContract.private_key);
+  }
+
+  const doMintNFT = async () => {
+    const nft_tokenId = await callMintContractApi(deployedContractAddress, deployerAccount, deployerPK);
+    setNftTokenId(nft_tokenId);
+  }
 
   return (showModal ? 
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
         <div>Giiiiveee meeee youurrrr monnneeeyyyyyy!!!!</div>
         <Spacer orientation="vertical" size={36}/>
-        <button onClick={() => {}} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
+        <button onClick={doDeployContract} style={{width: '200px', height: '32px'}}>Deploy Contract</button>
+        <div>NFT Contract Address: {deployedContractAddress}</div>
+        <div>Deployer Account: {deployerAccount}</div>
+        <div>Deployer PK: {deployerPK}</div>
+        <Spacer orientation="vertical" size={36}/>
+        <button onClick={doMintNFT} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
         <Spacer orientation="vertical" size={12} />
+        <div>Minted NFT TokenId: {nftTokenId}</div>
         <button onClick={onCloseModal} style={{width: '200px', height: '32px'}}>Close</button>
       </div>
     </div>
