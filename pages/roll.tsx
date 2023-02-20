@@ -14,10 +14,11 @@ const FLOW_TOKEN_OFFSET = 10000000;
 
 fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
 
-type PaymentModalProps ={
+type RollModalProps ={
   showModal: Boolean;
   onCloseModal: () => void;
   destAddress: string;
+  nftTokenId: string;
 }
 
 const Loader:React.FunctionComponent = (props) => {
@@ -34,22 +35,15 @@ const callRollApi = async (dest_addr: string) => {
   return data.nft_token_id;
 }
 
-const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
+const RollModal:React.FunctionComponent<RollModalProps> = (props) => {
   fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
-  const { showModal, onCloseModal, destAddress } = props;
-  const [ nftTokenId, setNftTokenId ] = useState('');
-
-  const doRoll = async () => {
-    const nft_tokenId = await callRollApi(destAddress);
-    setNftTokenId(nft_tokenId);
-  }
+  const { showModal, onCloseModal, destAddress, nftTokenId } = props;
 
   return (showModal ? 
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
         <div className={styles.modalContent}>
           <Spacer orientation="vertical" size={12} />
-          <button onClick={doRoll} style={{width: '200px', height: '32px'}}>Roll for a Gumball</button>
           <Spacer orientation="vertical" size={12} />
           <div>Minted NFT TokenId: {nftTokenId}</div>
           <Spacer orientation="vertical" size={24} />
@@ -67,7 +61,8 @@ export default function Login() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [publicAddress, setPublicAddress] = useState('');
   const [accountBalance, setAccountBalance] = useState(undefined);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showRollModal, setShowRollModal] = useState(false);
+  const [ nftTokenId, setNftTokenId ] = useState('');
 
   useAsyncEffect(() => {
     const context = {
@@ -102,6 +97,12 @@ export default function Login() {
     await getMagicInstance().user.logout();
     setIsLoggedIn(false)
     setIsLoading(false);
+  }
+
+  const doRoll = async () => {
+    setShowRollModal(true);
+    const nft_tokenId = await callRollApi(publicAddress);
+    setNftTokenId(nft_tokenId);
   }
 
   return (
@@ -144,7 +145,7 @@ export default function Login() {
             <Spacer orientation="vertical" size={24} />
             <button 
               style={{height: '36px', cursor: 'pointer'}}
-              onClick={() => setShowPaymentModal(true)}>Roll for $3</button>
+              onClick={doRoll}>Roll for a Gumball</button>
             <Spacer orientation="vertical" size={12} />
             <button 
               style={{height: '36px', cursor: 'pointer'}}
@@ -153,11 +154,12 @@ export default function Login() {
         </div>}
       </main>
       {
-        showPaymentModal &&
-          <PaymentModal
-            showModal={showPaymentModal}
-            onCloseModal={() => setShowPaymentModal(false)}
-            destAddress={publicAddress}/>
+        showRollModal &&
+          <RollModal
+            showModal={showRollModal}
+            onCloseModal={() => setShowRollModal(false)}
+            destAddress={publicAddress}
+            nftTokenId={nftTokenId}/>
       }
     </>
   )
