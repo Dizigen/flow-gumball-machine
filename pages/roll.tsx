@@ -16,26 +16,18 @@ fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
 
 type PaymentModalProps ={
   showModal: Boolean;
-  onCloseModal: () => void
+  onCloseModal: () => void;
+  destAddress: string;
 }
 
 const Loader:React.FunctionComponent = (props) => {
   return <div className={styles.loader}/>
 }
 
-const callDeployContractApi = async () => {
-  const res = await (await fetch(`/api/hello`));
-  const data = await res.json();
-  return data;
-}
-
-const callMintContractApi = async (tokenContractAddress: string, account: string, pk: string, url: string) => {
-  const res = await (await fetch(`/api/mint`, {
+const callRollApi = async (dest_addr: string) => {
+  const res = await (await fetch(`/api/roll`, {
     headers: {
-      contract_address: tokenContractAddress,
-      account,
-      pk,
-      url
+      dest_addr
     }
   }));
   const data = await res.json();
@@ -44,22 +36,11 @@ const callMintContractApi = async (tokenContractAddress: string, account: string
 
 const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   fcl.config().put('accessNode.api', 'https://rest-testnet.onflow.org');
-  const { showModal, onCloseModal } = props;
+  const { showModal, onCloseModal, destAddress } = props;
   const [ nftTokenId, setNftTokenId ] = useState('');
-  const [ deployedContractAddress, setDeployedContractAddress ] = useState('');
-  const [ deployerAccount, setDeployerAccount ] = useState('');
-  const [ deployerPK, setDeployerPK ] = useState('');
-  const [ assetUrl, setAssetUrl ] = useState('gemini/metadata.json');
 
-  const doDeployContract = async () => {
-    const resDeployContract = await callDeployContractApi();
-    setDeployedContractAddress(resDeployContract.contract_address);
-    setDeployerAccount(resDeployContract.account);
-    setDeployerPK(resDeployContract.private_key);
-  }
-
-  const doMintNFT = async () => {
-    const nft_tokenId = await callMintContractApi(deployedContractAddress, deployerAccount, deployerPK, assetUrl);
+  const doRoll = async () => {
+    const nft_tokenId = await callRollApi(destAddress);
     setNftTokenId(nft_tokenId);
   }
 
@@ -67,18 +48,8 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
         <div className={styles.modalContent}>
-          <button onClick={doDeployContract} style={{width: '200px', height: '32px'}}>Deploy Contract</button>
           <Spacer orientation="vertical" size={12} />
-          <div>NFT Contract Address: {deployedContractAddress}</div>
-          <div>Deployer Account: {deployerAccount}</div>
-          <div>Deployer PK: {deployerPK}</div>
-          <Spacer orientation="vertical" size={36}/>
-          <div>Token Uri: <input 
-            value={assetUrl}
-            onChange={(e) => setAssetUrl(e.target.value)}
-            style={{height: '36px', width: '200px'}}/> </div>
-          <Spacer orientation="vertical" size={12} />
-          <button onClick={doMintNFT} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
+          <button onClick={doRoll} style={{width: '200px', height: '32px'}}>Roll for a Gumball</button>
           <Spacer orientation="vertical" size={12} />
           <div>Minted NFT TokenId: {nftTokenId}</div>
           <Spacer orientation="vertical" size={24} />
@@ -182,7 +153,11 @@ export default function Login() {
         </div>}
       </main>
       {
-        showPaymentModal && <PaymentModal showModal={showPaymentModal} onCloseModal={() => setShowPaymentModal(false)}/>
+        showPaymentModal &&
+          <PaymentModal
+            showModal={showPaymentModal}
+            onCloseModal={() => setShowPaymentModal(false)}
+            destAddress={publicAddress}/>
       }
     </>
   )

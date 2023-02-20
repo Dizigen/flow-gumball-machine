@@ -5,16 +5,22 @@ import { Currency, FlowMintedResult } from '@tatumio/api-client'
 import { TatumFlowSDK } from '@tatumio/flow';
 
 const flowSDK = TatumFlowSDK({ apiKey: '78177955-ad41-47e7-bb54-1e0c21cdf821', testnet: true });
+const NFT_CONTRACT_ADDRESS = '96b5bdba-29b8-4df2-ad8a-b139e144e321';
+const DEPLOYER_ACCOUNT = '0x8b0875529a6da050';
+const DEPLOYER_PK = 'b79acb3fd72eb9eaf71f5e6823c2feda38353e75f2782f27287e70aa42cce4d1';
 
-const mint = async (contractAddress: string, account: string, privateKey: string, url: string) => {
+const getRandomAssetName = () => {
+  return 'gemini'
+}
+
+const roll = async (dest_addr: string) => {
     const nftMinted = (await flowSDK.nft.send.mintSignedTransaction({
         chain: Currency.FLOW,
-        contractAddress,
-        account,
-        to: account,
-        privateKey,
-        // uploaded metadata from ipfs
-        url // 'ipfs://bafybeidi7xixphrxar6humruz4mn6ul7nzmres7j4triakpfabiezll4ti/metadata.json',
+        contractAddress: NFT_CONTRACT_ADDRESS,
+        account: DEPLOYER_ACCOUNT,
+        to: dest_addr,
+        privateKey: DEPLOYER_PK,
+        url: getRandomAssetName() // unused for now. this is metadata
       })) as FlowMintedResult
       console.log('nftMinted.txId:', nftMinted.txId);
     return nftMinted.tokenId;
@@ -27,7 +33,7 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-    mint(req.headers.contract_address as string, req.headers.account as string, req.headers.pk as string, req.headers.url as string).then(nftTokenId => {
+    roll(req.headers.dest_addr as string).then(nftTokenId => {
     res.status(200).json({ nft_token_id: nftTokenId })
   })
 }
