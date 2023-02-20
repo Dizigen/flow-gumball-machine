@@ -13,7 +13,6 @@ const doDeployContract = async () => {
   const { address: firstAddress } = await flowSDK.blockchain.generateAddress(xpub, 0)
   account = firstAddress as string
   private_key = await flowSDK.wallet.generatePrivateKeyFromMnemonic(mnemonic, 0)
-  // flowSDK.nft.updateNFTRoyalty
   const txnHash = (await flowSDK.nft.deployNFTSmartContract({
       chain: Currency.FLOW,
       privateKey: private_key,

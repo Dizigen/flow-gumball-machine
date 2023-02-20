@@ -7,7 +7,6 @@ import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
 import Image from 'next/image';
 import Link from 'next/link'
-import { TatumFlowSDK } from '@tatumio/flow';
 const fcl = require("@onflow/fcl");
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,6 +21,8 @@ type RollModalProps ={
   destAddress: string;
   nftTokenId: string;
   status: string;
+  nftType: string;
+  nftTxId: string;
 }
 
 const Loader:React.FunctionComponent = (props) => {
@@ -35,21 +36,29 @@ const callRollApi = async (dest_addr: string) => {
     }
   }));
   const data = await res.json();
-  return data.nft_token_id;
+  return data;
 }
 
 const RollModal:React.FunctionComponent<RollModalProps> = (props) => {
-  const { showModal, onCloseModal, destAddress, nftTokenId, status } = props;
+  const { showModal, onCloseModal, destAddress, nftTokenId, status, nftType, nftTxId } = props;
 
   return (showModal ? 
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
         <div className={styles.modalContent}>
           <Spacer orientation="vertical" size={12} />
+          <div>Your address: {destAddress}</div>
+          <Spacer orientation="vertical" size={12} />
           <div>Status: {status}</div>
+          <Spacer orientation="vertical" size={12} />
+          <div>You got a: {nftType}</div>
           <Spacer orientation="vertical" size={12} />
           <div>Minted NFT TokenId: {nftTokenId}</div>
           <Spacer orientation="vertical" size={24} />
+          {status === 'Done!' && <>
+          <a href={"https://testnet.flowscan.org/transaction/" + nftTxId} target="_blank" rel="noreferrer">See on Flowscan</a>
+          <Spacer orientation="vertical" size={12} />
+          </>}
           <button onClick={onCloseModal} style={{width: '200px', height: '32px'}}>Close</button>
         </div>
       </div>
@@ -65,8 +74,12 @@ export default function Login() {
   const [publicAddress, setPublicAddress] = useState('');
   const [accountBalance, setAccountBalance] = useState(undefined);
   const [showRollModal, setShowRollModal] = useState(false);
+
+  // Results. Refreshes after every roll
   const [ nftTokenId, setNftTokenId ] = useState('');
+  const [ nftType, setnftType ] = useState('');
   const [ status, setStatus ] = useState('');
+  const [ nftTxId, setNftTxId ] = useState('');
 
   useAsyncEffect(() => {
     const context = {
@@ -131,8 +144,11 @@ export default function Login() {
     setStatus('Waiting for function to be sealed')
     await fcl.tx(response).onceSealed();
     setStatus('Rolling for an NFT')
-    const nft_tokenId = await callRollApi(publicAddress);
-    setNftTokenId(nft_tokenId);
+    const { nft_token_id, nft_type, tx_id } = await callRollApi(publicAddress);
+    setStatus('Done!')
+    setNftTokenId(nft_token_id);
+    setnftType(nft_type);
+    setNftTxId(tx_id);
   }
 
   return (
@@ -190,7 +206,9 @@ export default function Login() {
             onCloseModal={() => setShowRollModal(false)}
             destAddress={publicAddress}
             nftTokenId={nftTokenId}
-            status={status}/>
+            status={status}
+            nftType={nftType}
+            nftTxId={nftTxId}/>
       }
     </>
   )
