@@ -29,12 +29,13 @@ const callDeployContractApi = async () => {
   return data;
 }
 
-const callMintContractApi = async (tokenContractAddress: string, account: string, pk: string) => {
+const callMintContractApi = async (tokenContractAddress: string, account: string, pk: string, url: string) => {
   const res = await (await fetch(`/api/mint`, {
     headers: {
       contract_address: tokenContractAddress,
       account,
-      pk
+      pk,
+      url
     }
   }));
   const data = await res.json();
@@ -48,6 +49,7 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   const [ deployedContractAddress, setDeployedContractAddress ] = useState('');
   const [ deployerAccount, setDeployerAccount ] = useState('');
   const [ deployerPK, setDeployerPK ] = useState('');
+  const [ assetUrl, setAssetUrl ] = useState('ipfs://bafybeidi7xixphrxar6humruz4mn6ul7nzmres7j4triakpfabiezll4ti/metadata.json');
 
   const doDeployContract = async () => {
     const resDeployContract = await callDeployContractApi();
@@ -57,24 +59,32 @@ const PaymentModal:React.FunctionComponent<PaymentModalProps> = (props) => {
   }
 
   const doMintNFT = async () => {
-    const nft_tokenId = await callMintContractApi(deployedContractAddress, deployerAccount, deployerPK);
+    const nft_tokenId = await callMintContractApi(deployedContractAddress, deployerAccount, deployerPK, assetUrl);
     setNftTokenId(nft_tokenId);
   }
 
   return (showModal ? 
     <div className={`${styles.modalWrapper} ${inter.className}`}>
       <div className={styles.modal}>
-        <div>Giiiiveee meeee youurrrr monnneeeyyyyyy!!!!</div>
-        <Spacer orientation="vertical" size={36}/>
-        <button onClick={doDeployContract} style={{width: '200px', height: '32px'}}>Deploy Contract</button>
-        <div>NFT Contract Address: {deployedContractAddress}</div>
-        <div>Deployer Account: {deployerAccount}</div>
-        <div>Deployer PK: {deployerPK}</div>
-        <Spacer orientation="vertical" size={36}/>
-        <button onClick={doMintNFT} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
-        <Spacer orientation="vertical" size={12} />
-        <div>Minted NFT TokenId: {nftTokenId}</div>
-        <button onClick={onCloseModal} style={{width: '200px', height: '32px'}}>Close</button>
+        <div style={{width: '100%', height: '100%'}}>
+          <div>IPFS Url</div>
+          <input 
+            value={assetUrl}
+            onChange={(e) => setAssetUrl(e.target.value)}
+            style={{height: '36px', width: '200px'}}/>
+          <Spacer orientation="vertical" size={12} />
+          <button onClick={doDeployContract} style={{width: '200px', height: '32px'}}>Deploy Contract</button>
+          <Spacer orientation="vertical" size={12} />
+          <div>NFT Contract Address: {deployedContractAddress}</div>
+          <div>Deployer Account: {deployerAccount}</div>
+          <div>Deployer PK: {deployerPK}</div>
+          <Spacer orientation="vertical" size={36}/>
+          <button onClick={doMintNFT} style={{width: '200px', height: '32px'}}>Mint a Doohikkie</button>
+          <Spacer orientation="vertical" size={12} />
+          <div>Minted NFT TokenId: {nftTokenId}</div>
+          <Spacer orientation="vertical" size={24} />
+          <button onClick={onCloseModal} style={{width: '200px', height: '32px'}}>Close</button>
+        </div>
       </div>
     </div>
     : <></>
