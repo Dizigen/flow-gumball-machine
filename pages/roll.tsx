@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
 import Image from 'next/image';
-import Link from 'next/link'
 const fcl = require("@onflow/fcl");
 import { TatumFlowSDK } from '@tatumio/flow';
 import { Currency } from '@tatumio/api-client'
@@ -123,7 +122,6 @@ export default function Login() {
             setIsLoggedIn(loggedIn);
             if (loggedIn) {
                 const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
-                console.log('pubAddr', pubAddr);
                 setPublicAddress(pubAddr as string);
                 const assets = new Array();
                 const nftAccountBalance = (await flowSDK.nft.getNFTAccountBalance(Currency.FLOW, pubAddr as string, NFT_CONTRACT_ADDRESS)) as Array<string>;
@@ -163,6 +161,14 @@ export default function Login() {
     setNftTokenId(nft_token_id);
     setnftType(nft_type);
     setNftTxId(tx_id);
+  }
+
+  const closeModal = () => {
+    setNftTokenId('');
+    setnftType('');
+    setNftTxId('');
+    setStatus('')
+    setShowRollModal(false);
   }
 
   return (
@@ -213,7 +219,7 @@ export default function Login() {
         showRollModal &&
           <RollModal
             showModal={showRollModal}
-            onCloseModal={() => setShowRollModal(false)}
+            onCloseModal={closeModal}
             destAddress={publicAddress}
             nftTokenId={nftTokenId}
             status={status}

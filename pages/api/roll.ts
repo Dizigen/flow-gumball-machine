@@ -36,7 +36,7 @@ const getRandomAssetName = () => {
       return 'taurus';
     case 12:
     default:
-      return 'gemini';
+      return 'aquarius';
   }
 }
 
