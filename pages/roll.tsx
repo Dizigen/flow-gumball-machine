@@ -157,10 +157,6 @@ export default function Login() {
   }
   const doRoll = async () => {
     setShowRollModal(true);
-    // setStatus('Executing Authorization Function');
-    // const response = await doAuthorizeAccount();
-    // setStatus('Waiting for function to be sealed')
-    // await fcl.tx(response).onceSealed();
     setStatus('Rolling for an NFT')
     const { nft_token_id, nft_type, tx_id } = await callRollApi(publicAddress);
     setStatus('Done!')
@@ -199,10 +195,6 @@ export default function Login() {
         <div className={inter.className}>
           <div>Public Address: { publicAddress }</div>
           <div style={{ width: '400px'}}>Collection: [ {nftBalance.map((tokenName:string) => <>{tokenName}, </>)} ]</div>
-          <Link
-            href="https://testnet-faucet.onflow.org/fund-account"
-            style={{textDecoration: 'underline'}}
-            target="_blank">Testnet Faucet</Link>
           <Spacer orientation="vertical" size={24} />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Image src="/gumball-machine.png" alt="" width={480} height={480}/>
