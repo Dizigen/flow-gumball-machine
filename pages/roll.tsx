@@ -104,7 +104,6 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [publicAddress, setPublicAddress] = useState('');
-  const [accountBalance, setAccountBalance] = useState(undefined);
   const [showRollModal, setShowRollModal] = useState(false);
   const [nftBalance, setNftBalance] = useState([] as any);
 
@@ -126,12 +125,10 @@ export default function Login() {
                 const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
                 console.log('pubAddr', pubAddr);
                 setPublicAddress(pubAddr as string);
-                const acc = await fcl.account(pubAddr);
-                setAccountBalance(acc.balance);
                 const assets = new Array();
                 const nftAccountBalance = (await flowSDK.nft.getNFTAccountBalance(Currency.FLOW, pubAddr as string, NFT_CONTRACT_ADDRESS)) as Array<string>;
                 for (let i = 0; i < nftAccountBalance.length; i++) {
-                  const assetName = await flowSDK.nft.getNFTMetadataURI(Currency.FLOW, NFT_CONTRACT_ADDRESS, nftAccountBalance[i], publicAddress);
+                  const assetName = await flowSDK.nft.getNFTMetadataURI(Currency.FLOW, NFT_CONTRACT_ADDRESS, nftAccountBalance[i], pubAddr as string);
                   assets.unshift((assetName as any).data);
                 }
                 setNftBalance(assets);
@@ -147,8 +144,6 @@ export default function Login() {
     setIsLoggedIn(true);
     const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
     setPublicAddress(pubAddr || '');
-    const acc = await fcl.account(pubAddr);
-    setAccountBalance(acc.balance);
     const response = await doAuthorizeAccount();
     await fcl.tx(response).onceSealed();
     setIsLoading(false);
@@ -162,10 +157,10 @@ export default function Login() {
   }
   const doRoll = async () => {
     setShowRollModal(true);
-    setStatus('Executing Authorization Function');
-    const response = await doAuthorizeAccount()
-    setStatus('Waiting for function to be sealed')
-    await fcl.tx(response).onceSealed();
+    // setStatus('Executing Authorization Function');
+    // const response = await doAuthorizeAccount();
+    // setStatus('Waiting for function to be sealed')
+    // await fcl.tx(response).onceSealed();
     setStatus('Rolling for an NFT')
     const { nft_token_id, nft_type, tx_id } = await callRollApi(publicAddress);
     setStatus('Done!')
