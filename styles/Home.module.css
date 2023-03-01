@@ -44,6 +44,17 @@
   margin-left: 32px;
 }
 
+.loaderContent {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  margin-top: 20vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
 .loginInput {
   height: 32px;
   width: 200px;

@@ -69,8 +69,51 @@ type RollModalProps ={
   nftTxId: string;
 }
 
+const AnimatedLoader = ({ width, height }) => {
+  return (
+    <div>
+      <svg
+        version="1.1"
+        id="L9"
+        x="0px"
+        y="0px"
+        viewBox="0 0 100 100"
+        enableBackground="new 0 0 0 0"
+        width={`${width}px`}
+        height={`${height}px`}
+      >
+        <path
+          fill="#fff"
+          d="M73,50c0-12.7-10.3-23-23-23S27,37.3,27,50 M30.9,50c0-10.5,8.5-19.1,19.1-19.1S69.1,39.5,69.1,50"
+        >
+          <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            type="rotate"
+            dur="1s"
+            from="0 50 50"
+            to="360 50 50"
+            repeatCount="indefinite"
+          />
+        </path>
+      </svg>
+    </div>
+  );
+};
+
+AnimatedLoader.defaultProps = {
+  width: 200,
+  height: 200,
+};
+
 const Loader:React.FunctionComponent = (props) => {
-  return <div className={styles.loader}/>
+  return <div className={styles.loader}>
+    <h2 className={`${inter.className} ${styles.loaderContent}`}> 
+    Provisioning Wallet... <br />
+    This could take up to 30 seconds
+    <AnimatedLoader />
+    </h2>
+  </div>
 }
 
 const callRollApi = async (dest_addr: string) => {
@@ -187,6 +230,44 @@ export default function Login() {
     setPublicAddress(pubAddr || '');
     const response = await doAuthorizeAccount();
     await fcl.tx(response).onceSealed();
+    setPublicAddress(pubAddr as string);
+    const assets = new Array();
+    const nftAccountBalance = (await flowSDK.nft.getNFTAccountBalance(Currency.FLOW, pubAddr as string, NFT_CONTRACT_ADDRESS)) as Array<string>;
+    for (let i = 0; i < nftAccountBalance.length; i++) {
+      const assetName = await flowSDK.nft.getNFTMetadataURI(Currency.FLOW, NFT_CONTRACT_ADDRESS, nftAccountBalance[i], pubAddr as string);
+      assets.unshift((assetName as any).data);
+    }
+    setNftBalance(countStrings(assets));
+    setIsLoading(false);
+    const loaderUrl = "Build/builds.loader.js";
+    var script = window.document.createElement("script");
+    if ((window as any).scriptTag) return;
+    (window as any).scriptTag = script;
+    script.src = loaderUrl;
+    console.log('createUnityInstance');
+    script.onload = () => {
+      (window as any).createUnityInstance(document.querySelector("#unity-canvas"), {
+        dataUrl: "Build/builds.data",
+        frameworkUrl: "Build/builds.framework.js",
+        codeUrl: "Build/builds.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "SpacePop",
+        productVersion: "0.1",
+        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+      }).then((instance) => {
+        //only one event which is when they want to pull and nft. No error handling in game.
+        //can later add a fucntion to call which will reload scene in case of no funds.
+        (window as any).flowPubEvent = function(event) {
+          // console.log('window.flowPubEvent', event)
+          (window as any).doRoll();
+        };
+        (window as any).unityInstance = instance;
+        (window as any).unityInstance.SendMessage('ViewController', 'LoadWallet', JSON.stringify({flowTokens: 0, nfts: countStrings(assets)}));
+      });
+    };
+    window.document.body.appendChild(script);
     setIsLoading(false);
   }
 
