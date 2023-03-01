@@ -25,6 +25,18 @@ const getReferenceBlock = async () => {
   return data.id;
 };
 
+function countStrings(arr) {
+  let freq = {};
+  for (let str of arr) {
+    if (freq[str]) {
+      freq[str]++;
+    } else {
+      freq[str] = 1;
+    }
+  }
+  return freq;
+}
+
 const doAuthorizeAccount = async () => {
   const AUTHORIZATION_FUNCTION = getMagicInstance().flow.authorization;
 
@@ -130,7 +142,12 @@ export default function Login() {
                   const assetName = await flowSDK.nft.getNFTMetadataURI(Currency.FLOW, NFT_CONTRACT_ADDRESS, nftAccountBalance[i], pubAddr as string);
                   assets.unshift((assetName as any).data);
                 }
-                setNftBalance(assets);
+                // assets [gemini, gemini, aries, libra, etc]
+                console.log('assets', assets);
+                console.log('countStrings(assets)', countStrings(assets));
+                setNftBalance(countStrings(assets));
+                (window as any).unityInstance.SendMessage('ViewController', 'LoadWallet', JSON.stringify({flowTokens: 0, nfts: countStrings(assets)}));
+
             }
             setIsLoading(false);
           }
@@ -142,8 +159,8 @@ export default function Login() {
     var script = window.document.createElement("script");
     script.src = loaderUrl;
     script.onload = () => {
-      if (window.unityInstance) return;
-      window.createUnityInstance(document.querySelector("#unity-canvas"), {
+      if ((window as any).unityInstance) return;
+      (window as any).createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/builds.data",
         frameworkUrl: "Build/builds.framework.js",
         codeUrl: "Build/builds.wasm",
@@ -154,13 +171,13 @@ export default function Login() {
         // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
         // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
       }).then((instance) => {
-        instance.SendMessage('ViewController', 'LoadWallet', "{\"flowTokens\":12,\"nfts\":{\"gemini\":0,\"libra\":0,\"aquarius\":8,\"cancer\":0,\"scorpio\":8,\"pisces\":8,\"leo\":8,\"aries\":8,\"sagittarius\":8,\"taurus\":8,\"virgo\":8,\"capricorn\":8}}");
         //only one event which is when they want to pull and nft. No error handling in game.
         //can later add a fucntion to call which will reload scene in case of no funds.
-        window.flowPubEvent = function(event) {
-          window.doRoll();
+        (window as any).flowPubEvent = function(event) {
+          // console.log('window.flowPubEvent', event)
+          (window as any).doRoll();
         };
-        window.unityInstance = instance;
+        (window as any).unityInstance = instance;
       });
     };
     window.document.body.appendChild(script);
@@ -185,9 +202,9 @@ export default function Login() {
   }
 
   if (typeof window === 'undefined') return null;
-  window.doRoll = async () => {
+  (window as any).doRoll = async () => {
     const { nft_token_id, nft_type, tx_id } = await callRollApi(publicAddress);
-    window.unityInstance.SendMessage('Pull Zodiac', 'OnMintNft', nft_type.charAt(0).toUpperCase() + nft_type.slice(1));
+    (window as any).unityInstance.SendMessage('Pull Zodiac', 'OnMintNft', nft_type.charAt(0).toUpperCase() + nft_type.slice(1));
     setNftTokenId(nft_token_id);
     setnftType(nft_type);
     setNftTxId(tx_id);
