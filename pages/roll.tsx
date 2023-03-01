@@ -204,6 +204,17 @@ export default function Login() {
     setNftTokenId(nft_token_id);
     setnftType(nft_type);
     setNftTxId(tx_id);
+    const updatedAssets = nftBalance;
+    if (updatedAssets[nft_type]) {
+      updatedAssets[nft_type]++;
+    }
+    else {
+      updatedAssets[nft_type] = 1;
+    }
+    setNftBalance(updatedAssets);
+    console.log('updatedAssets', updatedAssets);
+    (window as any).unityInstance.SendMessage('ViewController', 'LoadWallet', JSON.stringify({flowTokens: 0, nfts: updatedAssets}));
+
   }
 
   /* const closeModal = () => {
