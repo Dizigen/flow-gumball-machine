@@ -198,7 +198,7 @@ export default function Login() {
   }
 
   if (typeof window === 'undefined') return null;
-  window.doRoll = async () => {
+  (window as any).doRoll = async () => {
     const { nft_token_id, nft_type, tx_id } = await callRollApi(publicAddress);
     (window as any).unityInstance.SendMessage('Pull Zodiac', 'OnMintNft', nft_type.charAt(0).toUpperCase() + nft_type.slice(1));
     setNftTokenId(nft_token_id);
@@ -241,16 +241,15 @@ export default function Login() {
         height="804"
         style={{width: "372px", height: "804px", background: "#231F20", display: `${isLoading || !isLoggedIn ? 'none' : 'block'}`}} />
         {isLoading && <Loader />}
-        <input type="text" />
         {!isLoggedIn &&
           <>
             <h2 className={inter.className}>
-              Enter Email to Login
+              Enter a User Name
             </h2>
             <Spacer orientation="vertical" size={12} />
-
+            <input type="text" className={styles.loginInput} value={userEmail} onChange={(e) => setUserEmail(e.target.value)}/>
             <Spacer orientation="vertical" size={12} />
-            <button style={{height: '36px', cursor: 'pointer'}} onClick={doLogin}>Login</button>
+            <button style={{height: '36px', cursor: 'pointer', padding: '0 12px'}} onClick={doLogin}>Login with Passkey</button>
             <Spacer orientation="vertical" size={12} />
           </>
         }
