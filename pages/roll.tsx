@@ -6,7 +6,7 @@ import Spacer from '@/components/shared/spacer'
 import { useEffect, useState } from 'react'
 import { useAsyncEffect } from 'usable-react'
 import { getMagicInstance } from '@/libs/magic-sdk'
-import Image from 'next/image';
+// import Image from 'next/image';
 const fcl = require("@onflow/fcl");
 import { TatumFlowSDK } from '@tatumio/flow';
 import { Currency } from '@tatumio/api-client'
@@ -83,7 +83,7 @@ const callRollApi = async (dest_addr: string) => {
   return data;
 }
 
-const RollModal:React.FunctionComponent<RollModalProps> = (props) => {
+/* const RollModal:React.FunctionComponent<RollModalProps> = (props) => {
   const { showModal, onCloseModal, destAddress, nftTokenId, status, nftType, nftTxId } = props;
 
   return (showModal ? 
@@ -109,7 +109,7 @@ const RollModal:React.FunctionComponent<RollModalProps> = (props) => {
     </div>
     : <></>
   )
-}
+}*/
 
 export default function Login() {
   const [userEmail, setUserEmail] = useState('');
@@ -142,50 +142,46 @@ export default function Login() {
                   const assetName = await flowSDK.nft.getNFTMetadataURI(Currency.FLOW, NFT_CONTRACT_ADDRESS, nftAccountBalance[i], pubAddr as string);
                   assets.unshift((assetName as any).data);
                 }
-                // assets [gemini, gemini, aries, libra, etc]
-                console.log('assets', assets);
-                console.log('countStrings(assets)', countStrings(assets));
                 setNftBalance(countStrings(assets));
-                (window as any).unityInstance.SendMessage('ViewController', 'LoadWallet', JSON.stringify({flowTokens: 0, nfts: countStrings(assets)}));
-
+                setIsLoading(false);
+                const loaderUrl = "Build/builds.loader.js";
+                var script = window.document.createElement("script");
+                if ((window as any).scriptTag) return;
+                (window as any).scriptTag = script;
+                script.src = loaderUrl;
+                console.log('createUnityInstance');
+                script.onload = () => {
+                  (window as any).createUnityInstance(document.querySelector("#unity-canvas"), {
+                    dataUrl: "Build/builds.data",
+                    frameworkUrl: "Build/builds.framework.js",
+                    codeUrl: "Build/builds.wasm",
+                    streamingAssetsUrl: "StreamingAssets",
+                    companyName: "DefaultCompany",
+                    productName: "SpacePop",
+                    productVersion: "0.1",
+                    // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+                    // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+                  }).then((instance) => {
+                    //only one event which is when they want to pull and nft. No error handling in game.
+                    //can later add a fucntion to call which will reload scene in case of no funds.
+                    (window as any).flowPubEvent = function(event) {
+                      // console.log('window.flowPubEvent', event)
+                      (window as any).doRoll();
+                    };
+                    (window as any).unityInstance = instance;
+                    (window as any).unityInstance.SendMessage('ViewController', 'LoadWallet', JSON.stringify({flowTokens: 0, nfts: countStrings(assets)}));
+                  });
+                };
+                window.document.body.appendChild(script);
             }
             setIsLoading(false);
           }
      }
   }, [])
 
-  useEffect(() => {
-    const loaderUrl = "Build/builds.loader.js";
-    var script = window.document.createElement("script");
-    script.src = loaderUrl;
-    script.onload = () => {
-      if ((window as any).unityInstance) return;
-      (window as any).createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/builds.data",
-        frameworkUrl: "Build/builds.framework.js",
-        codeUrl: "Build/builds.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "SpacePop",
-        productVersion: "0.1",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
-      }).then((instance) => {
-        //only one event which is when they want to pull and nft. No error handling in game.
-        //can later add a fucntion to call which will reload scene in case of no funds.
-        (window as any).flowPubEvent = function(event) {
-          // console.log('window.flowPubEvent', event)
-          (window as any).doRoll();
-        };
-        (window as any).unityInstance = instance;
-      });
-    };
-    window.document.body.appendChild(script);
-  }, []);
-
   const doLogin = async () => {
     setIsLoading(true);
-    await getMagicInstance().auth.loginWithEmailOTP({ email: userEmail });
+    const token = await getMagicInstance().webauthn.registerNewUser({ username: userEmail });
     setIsLoggedIn(true);
     const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
     setPublicAddress(pubAddr || '');
@@ -202,7 +198,7 @@ export default function Login() {
   }
 
   if (typeof window === 'undefined') return null;
-  (window as any).doRoll = async () => {
+  window.doRoll = async () => {
     const { nft_token_id, nft_type, tx_id } = await callRollApi(publicAddress);
     (window as any).unityInstance.SendMessage('Pull Zodiac', 'OnMintNft', nft_type.charAt(0).toUpperCase() + nft_type.slice(1));
     setNftTokenId(nft_token_id);
@@ -210,13 +206,13 @@ export default function Login() {
     setNftTxId(tx_id);
   }
 
-  const closeModal = () => {
+  /* const closeModal = () => {
     setNftTokenId('');
     setnftType('');
     setNftTxId('');
     setStatus('')
     setShowRollModal(false);
-  }
+  } */
 
   return (
     <>
@@ -225,26 +221,23 @@ export default function Login() {
         <meta name="description" content="Generated by create next app" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
-        <script src="Build/builds.loader.js"></script>
       </Head>
       <main className={styles.main}>
       <canvas 
         id="unity-canvas"
         width="372"
+        tabIndex={1}
         height="804"
-        style={{width: "372px", height: "804px", background: "#231F20", display: `${isLoading ? 'none' : 'block'}`}} />
+        style={{width: "372px", height: "804px", background: "#231F20", display: `${isLoading || !isLoggedIn ? 'none' : 'block'}`}} />
         {isLoading && <Loader />}
+        <input type="text" />
         {!isLoggedIn &&
           <>
             <h2 className={inter.className}>
               Enter Email to Login
             </h2>
             <Spacer orientation="vertical" size={12} />
-            <input 
-              className={`${styles.loginInput} ${inter.className}`} 
-              type="text" 
-              value={userEmail} 
-              onChange={(e) => setUserEmail(e.target.value)} />
+
             <Spacer orientation="vertical" size={12} />
             <button style={{height: '36px', cursor: 'pointer'}} onClick={doLogin}>Login</button>
             <Spacer orientation="vertical" size={12} />
@@ -267,10 +260,12 @@ export default function Login() {
               onClick={doLogout}>Logout</button>
           </div>
       </div>*/
+      isLoggedIn && <button style={{height: '36px', cursor: 'pointer'}} onClick={doLogout}>Logout</button>
       }
+
       </main>
       {
-        showRollModal &&
+        /*showRollModal &&
           <RollModal
             showModal={showRollModal}
             onCloseModal={closeModal}
@@ -278,7 +273,7 @@ export default function Login() {
             nftTokenId={nftTokenId}
             status={status}
             nftType={nftType}
-            nftTxId={nftTxId}/>
+            nftTxId={nftTxId}/>*/
       }
     </>
   )

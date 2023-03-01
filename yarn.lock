@@ -145,6 +145,11 @@
   resolved "https://registry.yarnpkg.com/@magic-ext/flow/-/flow-8.3.0.tgz#ec259b02819ad5d9678afe94e815d1da7eadd966"
   integrity sha512-mrRzFVEklS+nLcXvvqhzupUUsH9Oker8C3BkfLiGAwxBsbv+NdeQUJ7rr7dkS5yC2zXQLzHNKULxyGncAg0XHg==
 
+"@magic-ext/webauthn@^7.5.0":
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/@magic-ext/webauthn/-/webauthn-7.5.0.tgz#58245d1455f165bacc26f72335fc760046674c03"
+  integrity sha512-g+fQIT1ixTjtfv0PPzhb7Be8kqkpeySaJPhk7meD+Wb7EdP1Sihl1Z+OlStgxfK1WBJ9bKflnn5q3FDNTkSgQg==
+
 "@magic-sdk/commons@^9.3.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@magic-sdk/commons/-/commons-9.3.0.tgz#f026ca76d25612aeef08837646b8d2f2a0946ca3"
