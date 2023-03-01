@@ -224,7 +224,11 @@ export default function Login() {
 
   const doLogin = async () => {
     setIsLoading(true);
-    const token = await getMagicInstance().webauthn.registerNewUser({ username: userEmail });
+    try {
+      await getMagicInstance().webauthn.registerNewUser({ username: userEmail });
+    } catch {
+      await getMagicInstance().webauthn.login({ username: userEmail });
+    }
     setIsLoggedIn(true);
     const { publicAddress: pubAddr } = await getMagicInstance().user.getMetadata();
     setPublicAddress(pubAddr || '');
